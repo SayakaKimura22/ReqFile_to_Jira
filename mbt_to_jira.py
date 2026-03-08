@@ -250,7 +250,21 @@ def build_issue_fields(row: RowData, issue_type: str, custom_fields: dict[str, s
 
     if issue_type == ISSUE_TYPE_STORY:
         if row.detail:
-            fields["description"] = row.detail
+            fields["description"] = {
+                "type": "doc",
+                "version": 1,
+                "content": [
+                    {
+                        "type": "paragraph",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": row.detail,
+                            }
+                        ],
+                    }
+                ],
+            }
     elif issue_type == ISSUE_TYPE_BUG:
         if row.detail:
             fields[custom_fields["symptom"]] = row.detail
@@ -336,8 +350,8 @@ def main() -> int:
             return 0
 
         issue_key = create_issue(creds, fields)
-        write_back_ticket_no(workbook, worksheet, row.row_index, issue_key, excel_path)
         print(f"[INFO] Jira起票成功: {issue_key}")
+        write_back_ticket_no(workbook, worksheet, row.row_index, issue_key, excel_path)
         print("[RESULT] SUCCESS")
         return 0
 
